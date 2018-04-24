@@ -17,13 +17,13 @@
 resource "google_compute_instance_template" "default" {
   count       = "${var.module_enabled ? 1 : 0}"
   project     = "${var.project}"
-  name_prefix = "default-"
+  name_prefix = "${var.name}-"
 
   machine_type = "${var.machine_type}"
 
   region = "${var.region}"
 
-  tags = ["${concat(list("allow-ssh"), var.target_tags)}"]
+  tags = ["${var.target_tags}"]
 
   labels = "${var.instance_labels}"
 
@@ -228,21 +228,6 @@ resource "null_resource" "region_dummy_dependency" {
   }
 }
 
-resource "google_compute_firewall" "default-ssh" {
-  count   = "${var.module_enabled && var.ssh_fw_rule ? 1 : 0}"
-  project = "${var.subnetwork_project == "" ? var.project : var.subnetwork_project}"
-  name    = "${var.name}-vm-ssh"
-  network = "${var.network}"
-
-  allow {
-    protocol = "tcp"
-    ports    = ["22"]
-  }
-
-  source_ranges = ["${var.ssh_source_ranges}"]
-  target_tags   = ["allow-ssh"]
-}
-
 resource "google_compute_health_check" "mig-health-check" {
   count   = "${var.module_enabled && var.http_health_check ? 1 : 0}"
   name    = "${var.name}"
@@ -262,7 +247,7 @@ resource "google_compute_health_check" "mig-health-check" {
 resource "google_compute_firewall" "mig-health-check" {
   count   = "${var.module_enabled && var.http_health_check ? 1 : 0}"
   project = "${var.subnetwork_project == "" ? var.project : var.subnetwork_project}"
-  name    = "${var.name}-vm-hc"
+  name    = "${var.network}-${var.name}-group-hc"
   network = "${var.network}"
 
   allow {
