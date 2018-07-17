@@ -284,5 +284,5 @@ variable hc_path {
 
 variable ssh_fw_rule {
   description = "Whether or not the SSH Firewall Rule should be created"
-  default = true
+  default     = true
 }
