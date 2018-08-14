@@ -92,7 +92,7 @@ variable machine_type {
 
 variable compute_image {
   description = "Image used for compute VMs."
-  default     = "debian-cloud/debian-8"
+  default     = "debian-cloud/debian-9"
 }
 
 variable wait_for_instances {
@@ -249,7 +249,7 @@ variable health_check_type {
 
 variable hc_initial_delay {
   description = "Health check, intial delay in seconds."
-  default     = 300
+  default     = 30
 }
 
 variable hc_interval {
