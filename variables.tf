@@ -247,6 +247,11 @@ variable health_check_type {
 
 /* Health checks */
 
+variable http_health_check {
+  description = "Enable or disable the http health check for auto healing."
+  default     = true
+}
+
 variable hc_initial_delay {
   description = "Health check, intial delay in seconds."
   default     = 30
