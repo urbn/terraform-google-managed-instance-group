@@ -92,7 +92,7 @@ variable machine_type {
 
 variable compute_image {
   description = "Image used for compute VMs."
-  default     = "debian-cloud/debian-8"
+  default     = "debian-cloud/debian-9"
 }
 
 variable wait_for_instances {
@@ -102,7 +102,7 @@ variable wait_for_instances {
 
 variable update_strategy {
   description = "The strategy to apply when the instance template changes."
-  default     = "RESTART"
+  default     = "NONE"
 }
 
 variable rolling_update_policy {
@@ -123,6 +123,12 @@ variable target_tags {
   description = "Tag added to instances for firewall and networking."
   type        = "list"
   default     = ["allow-service"]
+}
+
+variable instance_labels {
+  description = "Labels added to instances."
+  type        = "map"
+  default     = {}
 }
 
 variable target_pools {
@@ -169,7 +175,7 @@ variable zonal {
 }
 
 variable distribution_policy_zones {
-  description = "The distribution policy for this managed instance group when zonal=false."
+  description = "The distribution policy for this managed instance group when zonal=false. Default is all zones in given region."
   type        = "list"
   default     = []
 }
@@ -241,9 +247,14 @@ variable health_check_type {
 
 /* Health checks */
 
+variable http_health_check {
+  description = "Enable or disable the http health check for auto healing."
+  default     = true
+}
+
 variable hc_initial_delay {
   description = "Health check, intial delay in seconds."
-  default     = 300
+  default     = 30
 }
 
 variable hc_interval {
@@ -274,4 +285,9 @@ variable hc_port {
 variable hc_path {
   description = "Health check, the http path to check."
   default     = "/"
+}
+
+variable ssh_fw_rule {
+  description = "Whether or not the SSH Firewall Rule should be created"
+  default     = true
 }

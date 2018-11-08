@@ -25,6 +25,8 @@ resource "google_compute_instance_template" "default" {
 
   tags = ["${var.target_tags}"]
 
+  labels = "${var.instance_labels}"
+
   network_interface {
     network            = "${var.subnetwork == "" ? var.network : ""}"
     subnetwork         = "${var.subnetwork}"
@@ -74,6 +76,8 @@ resource "google_compute_instance_group_manager" "default" {
 
   update_strategy = "${var.update_strategy}"
 
+  rolling_update_policy = ["${var.rolling_update_policy}"]
+
   target_pools = ["${var.target_pools}"]
 
   // There is no way to unset target_size when autoscaling is true so for now, jsut use the min_replicas value.
@@ -96,9 +100,8 @@ resource "google_compute_instance_group_manager" "default" {
   }
 
   provisioner "local-exec" {
-    when        = "create"
-    command     = "${var.local_cmd_create}"
-    interpreter = ["sh", "-c"]
+    when    = "create"
+    command = "${var.local_cmd_create}"
   }
 }
 
@@ -119,6 +122,20 @@ resource "google_compute_autoscaler" "default" {
   }
 }
 
+data "google_compute_zones" "available" {
+  project = "${var.project}"
+  region  = "${var.region}"
+}
+
+locals {
+  distribution_zones = {
+    default = ["${data.google_compute_zones.available.names}"]
+    user    = ["${var.distribution_policy_zones}"]
+  }
+
+  dependency_id = "${element(concat(null_resource.region_dummy_dependency.*.id, list("disabled")), 0)}"
+}
+
 resource "google_compute_region_instance_group_manager" "default" {
   count              = "${var.module_enabled && ! var.zonal ? 1 : 0}"
   project            = "${var.project}"
@@ -136,7 +153,7 @@ resource "google_compute_region_instance_group_manager" "default" {
 
   rolling_update_policy = ["${var.rolling_update_policy}"]
 
-  distribution_policy_zones = ["${var.distribution_policy_zones}"]
+  distribution_policy_zones = ["${local.distribution_zones["${length(var.distribution_policy_zones) == 0 ? "default" : "user"}"]}"]
 
   target_pools = ["${var.target_pools}"]
 
@@ -160,9 +177,13 @@ resource "google_compute_region_instance_group_manager" "default" {
   }
 
   provisioner "local-exec" {
-    when        = "create"
-    command     = "${var.local_cmd_create}"
-    interpreter = ["sh", "-c"]
+    when    = "create"
+    command = "${var.local_cmd_create}"
+  }
+
+  // Initial instance verification can take 10-15m when a health check is present.
+  timeouts = {
+    create = "${var.http_health_check ? "15m" : "5m"}"
   }
 }
 
@@ -186,11 +207,19 @@ resource "google_compute_region_autoscaler" "default" {
 resource "null_resource" "dummy_dependency" {
   count      = "${var.module_enabled && var.zonal ? 1 : 0}"
   depends_on = ["google_compute_instance_group_manager.default"]
+
+  triggers = {
+    instance_template = "${element(google_compute_instance_template.default.*.self_link, 0)}"
+  }
 }
 
 resource "null_resource" "region_dummy_dependency" {
   count      = "${var.module_enabled && ! var.zonal ? 1 : 0}"
   depends_on = ["google_compute_region_instance_group_manager.default"]
+
+  triggers = {
+    instance_template = "${element(google_compute_instance_template.default.*.self_link, 0)}"
+  }
 }
 
 resource "google_compute_health_check" "mig-https-health-check" {
@@ -242,7 +271,9 @@ resource "google_compute_firewall" "mig-health-check" {
 
 data "google_compute_instance_group" "zonal" {
   count   = "${var.zonal ? 1 : 0}"
-  name    = "${google_compute_instance_group_manager.default.name}"
   zone    = "${var.zone}"
   project = "${var.project}"
+
+  // Use the dependency id which is recreated whenever the instance template changes to signal when to re-read the data source.
+  name = "${element(split("|", "${local.dependency_id}|${element(concat(google_compute_instance_group_manager.default.*.name, list("unused")), 0)}"), 1)}"
 }
