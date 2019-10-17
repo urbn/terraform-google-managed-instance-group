@@ -138,20 +138,17 @@ resource "google_compute_region_instance_group_manager" "default" {
   name               = "${var.name}"
   description        = "compute VM Instance Group"
   wait_for_instances = "${var.wait_for_instances}"
-
   base_instance_name = "${var.name}"
+  
   version {
+    name = "${var.name}"
     instance_template = "${google_compute_instance_template.default.self_link}"
   }
   
   region = "${var.region}"
-
   update_strategy = "${var.update_strategy}"
-
   rolling_update_policy = ["${var.rolling_update_policy}"]
-
   distribution_policy_zones = ["${var.distribution_policy_zones}"]
-
   target_pools = ["${var.target_pools}"]
 
   // There is no way to unset target_size when autoscaling is true so for now, jsut use the min_replicas value.
