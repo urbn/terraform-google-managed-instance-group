@@ -19,6 +19,7 @@ provider "google-beta" {
 }
 
 resource "google_compute_instance_template" "default" {
+  provider    = "google-beta"
   count       = "${var.module_enabled ? 1 : 0}"
   project     = "${var.project}"
   name_prefix = "${var.name}-"
