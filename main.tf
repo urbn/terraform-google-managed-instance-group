@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+provider "google-beta" {
+  project     = "${var.project}"
+  region      = "${var.region}"
+}
 
 resource "google_compute_instance_template" "default" {
   count       = "${var.module_enabled ? 1 : 0}"
@@ -126,6 +130,7 @@ resource "google_compute_autoscaler" "default" {
 }
 
 resource "google_compute_region_instance_group_manager" "default" {
+  provider           = "google-beta"
   count              = "${var.module_enabled && ! var.zonal ? 1 : 0}"
   project            = "${var.project}"
   name               = "${var.name}"
