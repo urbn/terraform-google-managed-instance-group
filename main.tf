@@ -66,6 +66,7 @@ resource "google_compute_instance_template" "default" {
 }
 
 resource "google_compute_instance_group_manager" "default" {
+  provider           = "google-beta"
   count              = "${var.module_enabled && var.zonal ? 1 : 0}"
   project            = "${var.project}"
   name               = "${var.name}"
@@ -73,9 +74,9 @@ resource "google_compute_instance_group_manager" "default" {
   wait_for_instances = "${var.wait_for_instances}"
 
   base_instance_name = "${var.name}"
-
-  instance_template = "${google_compute_instance_template.default.self_link}"
-
+  version {
+    instance_template = "${google_compute_instance_template.default.self_link}"
+  }
   zone = "${var.zone}"
 
   update_strategy = "${var.update_strategy}"
