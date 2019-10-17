@@ -140,9 +140,10 @@ resource "google_compute_region_instance_group_manager" "default" {
   wait_for_instances = "${var.wait_for_instances}"
 
   base_instance_name = "${var.name}"
-
-  instance_template = "${google_compute_instance_template.default.self_link}"
-
+  version {
+    instance_template = "${google_compute_instance_template.default.self_link}"
+  }
+  
   region = "${var.region}"
 
   update_strategy = "${var.update_strategy}"
