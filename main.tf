@@ -114,6 +114,7 @@ resource "google_compute_instance_group_manager" "default" {
 }
 
 resource "google_compute_autoscaler" "default" {
+  provider= google-beta
   count   = var.module_enabled && var.autoscaling && var.zonal ? 1 : 0
   name    = var.name
   zone    = var.zone
@@ -147,6 +148,16 @@ resource "google_compute_autoscaler" "default" {
 
       content {
         target = load_balancing_utilization.value["target"]
+      }
+    }
+    dynamic "scaling_schedules" {
+      for_each = var.scaling_schedules
+      
+      content {
+        name = scaling_schedules.value["name"]
+        min_required_replicas = scaling_schedules.value["min_required_replicas"]
+        schedule = scaling_schedules.value["schedule"]
+        duration_sec = scaling_schedules.value["duration_sec"]
       }
     }
   }
@@ -213,6 +224,7 @@ resource "google_compute_region_instance_group_manager" "default" {
 }
 
 resource "google_compute_region_autoscaler" "default" {
+  provider= google-beta
   count   = var.module_enabled && var.autoscaling && ! var.zonal ? 1 : 0
   name    = var.name
   region  = var.region
@@ -247,6 +259,16 @@ resource "google_compute_region_autoscaler" "default" {
 
       content {
         target = load_balancing_utilization.value["target"]
+      }
+    }
+    dynamic "scaling_schedules" {
+      for_each = var.scaling_schedules
+      
+      content {
+        name = scaling_schedules.value["name"]
+        min_required_replicas = scaling_schedules.value["min_required_replicas"]
+        schedule = scaling_schedules.value["schedule"]
+        duration_sec = scaling_schedules.value["duration_sec"]
       }
     }
   }

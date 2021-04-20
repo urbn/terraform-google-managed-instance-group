@@ -223,6 +223,11 @@ variable autoscaling_lb {
   type        = list
   default     = []
 }
+variable scaling_schedules {
+  description = "Describes scaling schedules for MIG"
+  type        = list
+  default     = []
+}
 
 variable health_check_type {
   description = "Describes the type of health check required. Valid values are empty, HTTP or HTTPS"
