@@ -161,11 +161,12 @@ resource "google_compute_autoscaler" "default" {
     #     duration_sec = scaling_schedules.value["duration_sec"]
     #   }
     # }
+
     scaling_schedules {
-      name = var.min_required_replicas
-      min_required_replicas = var.min_required_replicas
-      schedule = var.schedule
-      duration_sec = var.duration_sec
+      name = var.scaling_schedules.name
+      min_required_replicas = var.scaling_schedules.min_required_replicas
+      schedule = var.scaling_schedules.schedule
+      duration_sec = var.scaling_schedules.duration_sec
       # description = "sushanth schedule"
      }
   }
@@ -280,12 +281,12 @@ resource "google_compute_region_autoscaler" "default" {
     #   }
     # }
     scaling_schedules {
-      name = var.min_required_replicas
-      min_required_replicas = var.min_required_replicas
-      schedule = var.schedule
-      duration_sec = var.duration_sec
+      name = var.scaling_schedules.name
+      min_required_replicas = var.scaling_schedules.min_required_replicas
+      schedule = var.scaling_schedules.schedule
+      duration_sec = var.scaling_schedules.duration_sec
       # description = "sushanth schedule"
-    }
+     }
   }
 }
 

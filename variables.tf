@@ -223,12 +223,15 @@ variable autoscaling_lb {
   type        = list
   default     = []
 }
-variable scaling_schedules {
-  description = "Describes scaling schedules for MIG"
-  type        = list
-  default     = []
-}
 
+variable "scaling_schedules" {
+  default = {
+    "name" = "sbk-schedule"
+    "min_required_replicas" = 2
+    "schedule" = "0 20 * * *"
+    "duration_sec" = 10
+  }
+}
 variable health_check_type {
   description = "Describes the type of health check required. Valid values are empty, HTTP or HTTPS"
   default     = "HTTP"
