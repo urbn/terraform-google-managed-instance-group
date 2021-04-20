@@ -114,12 +114,12 @@ resource "google_compute_instance_group_manager" "default" {
 }
 
 resource "google_compute_autoscaler" "default" {
-  provider= google-beta
-  count   = var.module_enabled && var.autoscaling && var.zonal ? 1 : 0
-  name    = var.name
-  zone    = var.zone
-  project = var.project
-  target  = google_compute_instance_group_manager.default[count.index].self_link
+  provider           = google-beta
+  count              = var.module_enabled && var.autoscaling && var.zonal ? 1 : 0
+  name               = var.name
+  zone               = var.zone
+  project            = var.project
+  target             = google_compute_instance_group_manager.default[count.index].self_link
 
   autoscaling_policy {
     max_replicas    = var.max_replicas
@@ -150,16 +150,24 @@ resource "google_compute_autoscaler" "default" {
         target = load_balancing_utilization.value["target"]
       }
     }
-    dynamic "scaling_schedules" {
-      for_each = var.scaling_schedules
+
+    # dynamic "scaling_schedules" {
+    #   for_each = var.scaling_schedules
       
-      content {
-        name = scaling_schedules.value["name"]
-        min_required_replicas = scaling_schedules.value["min_required_replicas"]
-        schedule = scaling_schedules.value["schedule"]
-        duration_sec = scaling_schedules.value["duration_sec"]
-      }
-    }
+    #   content {
+    #     name = scaling_schedules.value["name"]
+    #     min_required_replicas = scaling_schedules.value["min_required_replicas"]
+    #     schedule = scaling_schedules.value["schedule"]
+    #     duration_sec = scaling_schedules.value["duration_sec"]
+    #   }
+    # }
+    scaling_schedules {
+      name = var.min_required_replicas
+      min_required_replicas = var.min_required_replicas
+      schedule = var.schedule
+      duration_sec = var.duration_sec
+      # description = "sushanth schedule"
+     }
   }
 }
 
@@ -224,12 +232,12 @@ resource "google_compute_region_instance_group_manager" "default" {
 }
 
 resource "google_compute_region_autoscaler" "default" {
-  provider= google-beta
-  count   = var.module_enabled && var.autoscaling && ! var.zonal ? 1 : 0
-  name    = var.name
-  region  = var.region
-  project = var.project
-  target  = google_compute_region_instance_group_manager.default[count.index].self_link
+  provider = google-beta
+  count    = var.module_enabled && var.autoscaling && ! var.zonal ? 1 : 0
+  name     = var.name
+  region   = var.region
+  project  = var.project
+  target   = google_compute_region_instance_group_manager.default[count.index].self_link
 
   autoscaling_policy {
     max_replicas    = var.max_replicas
@@ -261,15 +269,22 @@ resource "google_compute_region_autoscaler" "default" {
         target = load_balancing_utilization.value["target"]
       }
     }
-    dynamic "scaling_schedules" {
-      for_each = var.scaling_schedules
+    # dynamic "scaling_schedules" {
+    #   for_each = var.scaling_schedules
       
-      content {
-        name = scaling_schedules.value["name"]
-        min_required_replicas = scaling_schedules.value["min_required_replicas"]
-        schedule = scaling_schedules.value["schedule"]
-        duration_sec = scaling_schedules.value["duration_sec"]
-      }
+    #   content {
+    #     name = scaling_schedules.value["name"]
+    #     min_required_replicas = scaling_schedules.value["min_required_replicas"]
+    #     schedule = scaling_schedules.value["schedule"]
+    #     duration_sec = scaling_schedules.value["duration_sec"]
+    #   }
+    # }
+    scaling_schedules {
+      name = var.min_required_replicas
+      min_required_replicas = var.min_required_replicas
+      schedule = var.schedule
+      duration_sec = var.duration_sec
+      # description = "sushanth schedule"
     }
   }
 }
