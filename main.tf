@@ -118,6 +118,7 @@ resource "google_compute_autoscaler" "default" {
   name    = var.name
   zone    = var.zone
   project = var.project
+  provider = google-beta
   target  = google_compute_instance_group_manager.default[count.index].self_link
 
   autoscaling_policy {
@@ -149,7 +150,18 @@ resource "google_compute_autoscaler" "default" {
         target = load_balancing_utilization.value["target"]
       }
     }
-  }
+    dynamic "scaling_schedules" {
+     for_each = var.scaling_schedules
+     
+     content {
+       name = lookup(scaling_schedules.value, "name", null)
+       disabled = lookup(scaling_schedules.value, "disabled", null)
+       min_required_replicas = lookup(scaling_schedules.value, "min_required_replicas", null)
+       schedule = lookup(scaling_schedules.value, "schedule", null)
+       duration_sec = lookup(scaling_schedules.value, "duration_sec", null)
+     }
+    }
+  }  
 }
 
 resource "google_compute_region_instance_group_manager" "default" {
@@ -217,6 +229,7 @@ resource "google_compute_region_autoscaler" "default" {
   name    = var.name
   region  = var.region
   project = var.project
+  provider = google-beta
   target  = google_compute_region_instance_group_manager.default[count.index].self_link
 
   autoscaling_policy {
@@ -248,6 +261,18 @@ resource "google_compute_region_autoscaler" "default" {
       content {
         target = load_balancing_utilization.value["target"]
       }
+    }
+    
+    dynamic "scaling_schedules" {
+     for_each = var.scaling_schedules
+     
+     content {
+       name = lookup(scaling_schedules.value, "name", null)
+       disabled = lookup(scaling_schedules.value, "disabled", null)
+       min_required_replicas = lookup(scaling_schedules.value, "min_required_replicas", null)
+       schedule = lookup(scaling_schedules.value, "schedule", null)
+       duration_sec = lookup(scaling_schedules.value, "duration_sec", null)
+     }
     }
   }
 }
