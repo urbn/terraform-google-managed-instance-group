@@ -224,8 +224,11 @@ variable autoscaling_lb {
   default     = []
 }
 
-variable scaling_schedules {
-  default = [{}]
+variable "scaling_schedules" {
+  default = {}
+}
+variable "scaling_schedules_west" {
+  default = {}
 }
 
 variable health_check_type {

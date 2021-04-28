@@ -151,15 +151,15 @@ resource "google_compute_autoscaler" "default" {
       }
     }
     dynamic "scaling_schedules" {
-      for_each = var.scaling_schedules
-      
-      content {
-        name = scaling_schedules.value["name"]
-        disabled = scaling_schedules.value["disabled"]
-        min_required_replicas = scaling_schedules.value["min_required_replicas"]
-        schedule = scaling_schedules.value["schedule"]
-        duration_sec = scaling_schedules.value["duration_sec"]
-      }
+     for_each = var.scaling_schedules
+     
+     content {
+       name = lookup(scaling_schedules.value, "name", null)
+       disabled = lookup(scaling_schedules.value, "disabled", null)
+       min_required_replicas = lookup(scaling_schedules.value, "min_required_replicas", null)
+       schedule = lookup(scaling_schedules.value, "schedule", null)
+       duration_sec = lookup(scaling_schedules.value, "duration_sec", null)
+     }
     }
   }  
 }
@@ -264,15 +264,15 @@ resource "google_compute_region_autoscaler" "default" {
     }
     
     dynamic "scaling_schedules" {
-      for_each = var.scaling_schedules
-      
-      content {
-        name = scaling_schedules.value["name"]
-        disabled = scaling_schedules.value["disabled"]
-        min_required_replicas = scaling_schedules.value["min_required_replicas"]
-        schedule = scaling_schedules.value["schedule"]
-        duration_sec = scaling_schedules.value["duration_sec"]
-      }
+     for_each = var.scaling_schedules
+     
+     content {
+       name = lookup(scaling_schedules.value, "name", null)
+       disabled = lookup(scaling_schedules.value, "disabled", null)
+       min_required_replicas = lookup(scaling_schedules.value, "min_required_replicas", null)
+       schedule = lookup(scaling_schedules.value, "schedule", null)
+       duration_sec = lookup(scaling_schedules.value, "duration_sec", null)
+     }
     }
   }
 }
