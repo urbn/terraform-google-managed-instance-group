@@ -297,6 +297,7 @@ resource "google_compute_health_check" "mig-https-health-check" {
   timeout_sec         = var.hc_timeout
   healthy_threshold   = var.hc_healthy_threshold
   unhealthy_threshold = var.hc_unhealthy_threshold
+  host                = var.hc_host_header
 
   https_health_check {
     port         = var.hc_port == "" ? var.service_port : var.hc_port
@@ -314,6 +315,7 @@ resource "google_compute_health_check" "mig-http-health-check" {
   timeout_sec         = var.hc_timeout
   healthy_threshold   = var.hc_healthy_threshold
   unhealthy_threshold = var.hc_unhealthy_threshold
+  host                = var.hc_host_header
 
   http_health_check {
     port         = var.hc_port == "" ? var.service_port : var.hc_port

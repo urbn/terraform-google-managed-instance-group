@@ -270,6 +270,11 @@ variable hc_path {
   default     = "/"
 }
 
+variable hc_host_header {
+  description = "Health check, host header to pass."
+  default     = ""
+}
+
 variable template_labels {
   description = "A dictionary of labels to append to the default template."
 
