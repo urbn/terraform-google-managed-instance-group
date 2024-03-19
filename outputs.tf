@@ -21,7 +21,7 @@ output name {
 
 output instance_group {
   description = "Link to the `instance_group` property of the instance group manager resource."
-  value       = "${element(concat(google_compute_instance_group_manager.default.*.instance_group, list("")), 0)}"
+  value       = "${element(concat(google_compute_instance_group_manager.default.*.instance_group, tolist([""])), 0)}"
 }
 
 output instances {
@@ -31,7 +31,7 @@ output instances {
 
 output region_instance_group {
   description = "Link to the `instance_group` property of the region instance group manager resource."
-  value       = "${element(concat(google_compute_region_instance_group_manager.default.*.instance_group, list("")), 0)}"
+  value       = "${element(concat(google_compute_region_instance_group_manager.default.*.instance_group, tolist([""])), 0)}"
 }
 
 output target_tags {
@@ -51,12 +51,12 @@ output service_port_name {
 
 output depends_id {
   description = "Id of the dummy dependency created used for intra-module dependency creation with zonal groups."
-  value       = "${element(concat(null_resource.dummy_dependency.*.id, list("")), 0)}"
+  value       = "${element(concat(null_resource.dummy_dependency.*.id, tolist([""])), 0)}"
 }
 
 output region_depends_id {
   description = "Id of the dummy dependency created used for intra-module dependency creation with regional groups."
-  value       = "${element(concat(null_resource.region_dummy_dependency.*.id, list("")), 0)}"
+  value       = "${element(concat(null_resource.region_dummy_dependency.*.id, tolist([""])), 0)}"
 }
 
 output network_ip {
