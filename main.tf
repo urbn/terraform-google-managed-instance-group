@@ -60,7 +60,7 @@ resource "google_compute_instance_template" "default" {
   }
 
   metadata = merge(
-    tomap("startup-script", var.startup_script, "tf_depends_id", var.depends_id),
+    tomap({"startup-script" = var.startup_script, "tf_depends_id" = var.depends_id}),
     var.metadata
   )
 
