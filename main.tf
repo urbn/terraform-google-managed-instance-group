@@ -114,12 +114,12 @@ resource "google_compute_instance_group_manager" "default" {
 }
 
 resource "google_compute_autoscaler" "default" {
-  count   = var.module_enabled && var.autoscaling && var.zonal ? 1 : 0
-  name    = var.name
-  zone    = var.zone
-  project = var.project
+  count    = var.module_enabled && var.autoscaling && var.zonal ? 1 : 0
+  name     = var.name
+  zone     = var.zone
+  project  = var.project
   provider = google-beta
-  target  = google_compute_instance_group_manager.default[count.index].self_link
+  target   = google_compute_instance_group_manager.default[count.index].self_link
 
   autoscaling_policy {
     max_replicas    = var.max_replicas
@@ -151,17 +151,17 @@ resource "google_compute_autoscaler" "default" {
       }
     }
     dynamic "scaling_schedules" {
-     for_each = var.scaling_schedules
-     
-     content {
-       name = lookup(scaling_schedules.value, "name", null)
-       disabled = lookup(scaling_schedules.value, "disabled", null)
-       min_required_replicas = lookup(scaling_schedules.value, "min_required_replicas", null)
-       schedule = lookup(scaling_schedules.value, "schedule", null)
-       duration_sec = lookup(scaling_schedules.value, "duration_sec", null)
-     }
+      for_each = var.scaling_schedules
+
+      content {
+        name                  = lookup(scaling_schedules.value, "name", null)
+        disabled              = lookup(scaling_schedules.value, "disabled", null)
+        min_required_replicas = lookup(scaling_schedules.value, "min_required_replicas", null)
+        schedule              = lookup(scaling_schedules.value, "schedule", null)
+        duration_sec          = lookup(scaling_schedules.value, "duration_sec", null)
+      }
     }
-  }  
+  }
 }
 
 resource "google_compute_region_instance_group_manager" "default" {
@@ -199,7 +199,7 @@ resource "google_compute_region_instance_group_manager" "default" {
   target_size = var.autoscaling ? var.min_replicas : var.size
 
   auto_healing_policies {
-    health_check      = element(concat(google_compute_health_check.mig-http-health-check.*.self_link, google_compute_health_check.mig-https-health-check.*.self_link), 0)
+    health_check      = element(concat(google_compute_health_check.mig-http-health-check.*.self_link, google_compute_health_check.mig-https-health-check.*.self_link, google_compute_health_check.mig-tcp-health-check.*.self_link), 0)
     initial_delay_sec = var.hc_initial_delay
   }
 
@@ -225,12 +225,12 @@ resource "google_compute_region_instance_group_manager" "default" {
 }
 
 resource "google_compute_region_autoscaler" "default" {
-  count   = var.module_enabled && var.autoscaling && ! var.zonal ? 1 : 0
-  name    = var.name
-  region  = var.region
-  project = var.project
+  count    = var.module_enabled && var.autoscaling && ! var.zonal ? 1 : 0
+  name     = var.name
+  region   = var.region
+  project  = var.project
   provider = google-beta
-  target  = google_compute_region_instance_group_manager.default[count.index].self_link
+  target   = google_compute_region_instance_group_manager.default[count.index].self_link
 
   autoscaling_policy {
     max_replicas    = var.max_replicas
@@ -262,17 +262,17 @@ resource "google_compute_region_autoscaler" "default" {
         target = load_balancing_utilization.value["target"]
       }
     }
-    
+
     dynamic "scaling_schedules" {
-     for_each = var.scaling_schedules
-     
-     content {
-       name = lookup(scaling_schedules.value, "name", null)
-       disabled = lookup(scaling_schedules.value, "disabled", null)
-       min_required_replicas = lookup(scaling_schedules.value, "min_required_replicas", null)
-       schedule = lookup(scaling_schedules.value, "schedule", null)
-       duration_sec = lookup(scaling_schedules.value, "duration_sec", null)
-     }
+      for_each = var.scaling_schedules
+
+      content {
+        name                  = lookup(scaling_schedules.value, "name", null)
+        disabled              = lookup(scaling_schedules.value, "disabled", null)
+        min_required_replicas = lookup(scaling_schedules.value, "min_required_replicas", null)
+        schedule              = lookup(scaling_schedules.value, "schedule", null)
+        duration_sec          = lookup(scaling_schedules.value, "duration_sec", null)
+      }
     }
   }
 }
@@ -320,6 +320,20 @@ resource "google_compute_health_check" "mig-http-health-check" {
     port         = var.hc_port == "" ? var.service_port : var.hc_port
     request_path = var.hc_path
     host         = var.hc_host_header
+  }
+}
+
+resource "google_compute_health_check" "mig-tcp-health-check" {
+  provider = google-beta
+  count    = var.health_check_type == "TCP" ? 1 : 0
+  name     = var.name
+  project  = var.project
+
+  check_interval_sec = var.hc_interval
+  timeout_sec        = var.hc_timeout
+
+  tcp_health_check {
+    port = var.hc_port == "" ? var.service_port : var.hc_port
   }
 }
 
