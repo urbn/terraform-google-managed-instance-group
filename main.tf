@@ -98,7 +98,7 @@ resource "google_compute_instance_group_manager" "default" {
   }
 
   auto_healing_policies {
-    health_check      = element(concat(google_compute_health_check.mig-http-health-check.*.self_link, google_compute_health_check.mig-https-health-check.*.self_link), 0)
+    health_check      = element(concat(google_compute_health_check.mig-http-health-check.*.self_link, google_compute_health_check.mig-https-health-check.*.self_link, google_compute_health_check.mig-tcp-health-check.*.self_link), 0)
     initial_delay_sec = var.hc_initial_delay
   }
 
