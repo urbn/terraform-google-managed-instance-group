@@ -14,6 +14,34 @@
  * limitations under the License.
  */
 
+locals {
+  // Pub/Sub queue-based autoscaling metric.
+  //
+  // Terraform 0.11's conditional operator only supports primitive types, so we
+  // cannot write `condition ? list_a : list_b`. Instead we always build the
+  // single-element list and then slice it down to zero elements when no
+  // subscription was supplied. An empty list causes the provider to omit the
+  // `metric` block entirely.
+  autoscaling_pubsub_default_filter = "resource.type = pubsub_subscription AND resource.label.subscription_id = \"${var.autoscaling_pubsub_subscription}\""
+
+  autoscaling_pubsub_effective_filter = "${var.autoscaling_pubsub_filter == "" ? local.autoscaling_pubsub_default_filter : var.autoscaling_pubsub_filter}"
+
+  autoscaling_pubsub_metric_candidate = [
+    {
+      name                       = "${var.autoscaling_pubsub_metric_name}"
+      filter                     = "${local.autoscaling_pubsub_effective_filter}"
+      single_instance_assignment = "${var.autoscaling_pubsub_single_instance_assignment}"
+    },
+  ]
+
+  autoscaling_pubsub_metric_enabled = "${var.autoscaling_pubsub_subscription == "" && var.autoscaling_pubsub_filter == "" ? 0 : 1}"
+
+  autoscaling_pubsub_metric = "${slice(local.autoscaling_pubsub_metric_candidate, 0, local.autoscaling_pubsub_metric_enabled)}"
+
+  // Any explicitly-passed metric blocks win alongside the generated one.
+  autoscaling_metric = "${concat(var.autoscaling_metric, local.autoscaling_pubsub_metric)}"
+}
+
 resource "google_compute_instance_template" "default" {
   count       = "${var.module_enabled ? 1 : 0}"
   project     = "${var.project}"
@@ -114,7 +142,7 @@ resource "google_compute_autoscaler" "default" {
     min_replicas               = "${var.min_replicas}"
     cooldown_period            = "${var.cooldown_period}"
     cpu_utilization            = ["${var.autoscaling_cpu}"]
-    metric                     = ["${var.autoscaling_metric}"]
+    metric                     = ["${local.autoscaling_metric}"]
     load_balancing_utilization = ["${var.autoscaling_lb}"]
   }
 }
@@ -178,7 +206,7 @@ resource "google_compute_region_autoscaler" "default" {
     min_replicas               = "${var.min_replicas}"
     cooldown_period            = "${var.cooldown_period}"
     cpu_utilization            = ["${var.autoscaling_cpu}"]
-    metric                     = ["${var.autoscaling_metric}"]
+    metric                     = ["${local.autoscaling_metric}"]
     load_balancing_utilization = ["${var.autoscaling_lb}"]
   }
 }

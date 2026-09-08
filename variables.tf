@@ -228,6 +228,28 @@ variable autoscaling_metric {
   default     = []
 }
 
+/* Autoscaling on a Pub/Sub queue (optional) */
+
+variable autoscaling_pubsub_subscription {
+  description = "Autoscaling, Pub/Sub subscription ID to scale on. Note that GCE autoscales on a *subscription*, not a topic. Leave empty to disable the Pub/Sub metric entirely."
+  default     = ""
+}
+
+variable autoscaling_pubsub_single_instance_assignment {
+  description = "Autoscaling, how many undelivered Pub/Sub messages each instance is expected to handle. Only used when autoscaling_pubsub_subscription (or autoscaling_pubsub_filter) is set."
+  default     = 1000
+}
+
+variable autoscaling_pubsub_metric_name {
+  description = "Autoscaling, Cloud Monitoring metric to read for Pub/Sub queue depth."
+  default     = "pubsub.googleapis.com/subscription/num_undelivered_messages"
+}
+
+variable autoscaling_pubsub_filter {
+  description = "Autoscaling, override the generated Cloud Monitoring filter. Setting this enables the metric even if autoscaling_pubsub_subscription is empty."
+  default     = ""
+}
+
 variable autoscaling_lb {
   description = "Autoscaling, load balancing utilization policy block as single element array. https://www.terraform.io/docs/providers/google/r/compute_autoscaler.html#load_balancing_utilization"
   type        = "list"
